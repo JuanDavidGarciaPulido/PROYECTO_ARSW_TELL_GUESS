@@ -7,19 +7,13 @@ function initializeSocket() {
         return;
     }
 
-    const socket = io('ws://191.235.83.186:8080', {
+    const socket = io('ws://localhost:8080', {
         auth: {
             token
         }
     });
 
     let chosenWords = [];
-    let forbbidenWords = [];
-
-    socket.on('forbWords', (forbWords) => {
-        forbbidenWords = forbWords;
-        console.log(forbbidenWords['amable'])
-    });
 
     // Recupera el diccionario de palabras del servidor
     socket.on('words', (words) => {
@@ -42,15 +36,13 @@ function initializeSocket() {
         });
     });
 
-
-
     // Función para actualizar el rol y gestionar la visibilidad de elementos según el rol
     function updateUserInterface(isPistador, points, users) {
         const userTypeElement = document.querySelector('#user-type');
         const wordChoosedElement = document.querySelector('#word-choosed');
         const wordButtonsContainer = document.querySelector('.botones');
         const PointsElement = document.querySelector('#points');
-        const ForbiddenWordsHtml = document.querySelector('.forbidden-words');
+
         userTypeElement.innerHTML = `Rol: ${isPistador ? 'Pistador' : 'Adivinador'}`;
         PointsElement.innerHTML = `Puntos: ${points}`;
 
@@ -67,7 +59,6 @@ function initializeSocket() {
             wordChoosedElement.innerHTML = "Palabra: Selecciona una palabra";
             wordButtonsContainer.style.display = 'flex'; // Muestra los botones
         } else {
-            ForbiddenWordsHtml.style.display = 'none';
             wordChoosedElement.innerHTML = "Palabra: Oculta";
             wordButtonsContainer.style.display = 'none'; // Oculta los botones
         }
@@ -79,9 +70,6 @@ function initializeSocket() {
         wordChoosedElement.innerHTML = `Palabra: ${word}`;
         console.log(`Palabra elegida: ${word}`); // Mensaje en consola para verificar
         socket.emit('chosenWord', word); // Envía la palabra elegida al servidor
-        let forbWords = forbbidenWords[word];
-        console.log(forbWords);
-        document.querySelector('.forbidden-words').innerHTML = forbWords.join(", ");
     }
 
     // Llamada inicial para establecer el rol cuando la página carga

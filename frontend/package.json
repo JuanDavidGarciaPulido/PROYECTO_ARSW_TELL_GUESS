@@ -4,7 +4,7 @@
   "description": "Frontend for Tell and Guess - El Desafío",
   "main": "game.html",
   "scripts": {
-    "start": "http-server -p 8000"
+    "start": "http-server -p 80"
   },
   "dependencies": {
     "express": "^4.21.1",
