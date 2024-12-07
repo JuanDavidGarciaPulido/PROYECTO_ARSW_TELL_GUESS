@@ -91,22 +91,32 @@ io.use((socket, next) => {
 // Función para manejar la conexión del socket
 io.on('connection', (socket) => {
     userCount++;
-    let userName = `User ${userCount}`;
+    console.log("===============================================================================================")
+    console.log("username: " + socket.username)
+    let userName = socket.username;
 
     // Asigna el primer usuario como el Pistador
     if (pistadorSocket === null) {
         pistadorSocket = socket;
-        userName = 'Pistador';
+        role = 'Pistador';
     }
     users.set(socket.id, [userName, 0]);
     console.log(`${userName} connected with ID: ${socket.id}`);
 
     // Enviar el tipo de usuario al cliente
-    socket.emit('userType', { isPistador: socket === pistadorSocket, userName });
+    socket.emit('userType', { isPistador: socket === pistadorSocket, userName, points:0 });
 
     // Consultar la base de datos y enviar las palabras al cliente
     async function fetchData() {
         try {
+            // Consultar palabras prohibidas
+            const resForbiddenWords = await client.query('SELECT palabra, sinonimos FROM palabras');
+            resForbiddenWords.rows.forEach(row => {
+                forbiddenWordsDict[row.palabra] = row.sinonimos;
+            });
+            socket.emit('forbWords', forbiddenWordsDict);
+            console.log('Palabras prohibidas:', forbiddenWordsDict);
+
             // Consultar la tabla de palabras
             const resPalabras = await client.query('SELECT * FROM palabras');
             console.log('Tabla de Palabras:', resPalabras.rows);
@@ -118,12 +128,6 @@ io.on('connection', (socket) => {
             console.log('Tabla de Usuarios:', resUsuarios.rows);
             userTable = resUsuarios.row;
 
-            // Consultar palabras prohibidas
-            const resForbiddenWords = await client.query('SELECT palabra, sinonimos FROM palabras');
-            resForbiddenWords.rows.forEach(row => {
-                forbiddenWordsDict[row.palabra] = row.sinonimos;
-            });
-            console.log('Palabras prohibidas:', forbiddenWordsDict);
         } catch (err) {
             console.error('Error al consultar la base de datos:', err.stack);
         }
@@ -166,6 +170,7 @@ io.on('connection', (socket) => {
                 users.set(socket.id, userData);
                 console.log('estado', `${userData[0]} tiene ${userData[1]} puntos`);
                 io.emit('estado', `${userData[0]} tiene ${userData[1]} puntos`);
+                socket.emit('userType', { isPistador: false, userName: socket.username, points: users.get(socket.id)[1] });
                 newPistador()
                 return;
             }
@@ -182,9 +187,6 @@ io.on('connection', (socket) => {
     // Funcion que nos permite tener un nuevo pistador
     function newPistador() {
         oldPistador = pistadorSocket;
-        userCount++;
-        let userName = `User ${userCount}`;
-        users.set(oldPistador.id, [userName, users.get(oldPistador.id)[1]]);
         pistadorSocket = null;
         console.log('Pistador position is now open');
         const connectedSockets = Array.from(io.sockets.sockets.values()).filter(s => s.connected);
@@ -194,10 +196,9 @@ io.on('connection', (socket) => {
         }
         points = users.get(connectedSockets[randomIndex].id)[1];
         pistadorSocket = connectedSockets[randomIndex];
-        users.set(pistadorSocket.id, ['Pistador', points]);
         pistadorSocket.emit('message', 'You are now the Pistador');
-        pistadorSocket.emit('userType', { isPistador: true, userName: 'Pistador', points: users.get(pistadorSocket.id)[1] });
-        oldPistador.emit('userType', { isPistador: false, userName: userName, points: users.get(oldPistador.id)[1] });
+        pistadorSocket.emit('userType', { isPistador: true, userName: pistadorSocket.username, points: users.get(pistadorSocket.id)[1] });
+        oldPistador.emit('userType', { isPistador: false, userName: oldPistador.username, points: users.get(oldPistador.id)[1] });
         console.log('New Pistador assigned');
     };
 
@@ -212,9 +213,8 @@ io.on('connection', (socket) => {
             const connectedSockets = Array.from(io.sockets.sockets.values()).filter(s => s.connected);
             if (connectedSockets.length > 0) {
                 pistadorSocket = connectedSockets[0];
-                users.set(pistadorSocket.id, ['Pistador', 0]);
                 pistadorSocket.emit('message', 'You are now the Pistador');
-                pistadorSocket.emit('userType', { isPistador: true, userName: 'Pistador', points: '0' });
+                pistadorSocket.emit('userType', { isPistador: true, userName: pistadorSocket.username, points: users.get(pistadorSocket.id)[1] });
                 console.log('New Pistador assigned');
             }
         }
