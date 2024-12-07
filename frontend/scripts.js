@@ -7,7 +7,7 @@ function initializeSocket() {
         return;
     }
 
-    const socket = io('ws://localhost:8080', {
+    const socket = io('ws://191.235.83.186:8080', {
         auth: {
             token
         }
