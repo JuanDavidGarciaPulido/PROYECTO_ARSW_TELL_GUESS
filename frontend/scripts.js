@@ -7,7 +7,7 @@ function initializeSocket() {
         return;
     }
 
-    const socket = io('ws://localhost:8080', {
+    const socket = io('ws://191.235.83.186:8080', {
         auth: {
             token
         }
@@ -62,6 +62,7 @@ function initializeSocket() {
                     selectWord(word.palabra);
                     console.log(`Palabra elegida: ${word.palabra}`); // Verificar en la consola
                     document.querySelector('.botones').style.display = 'none'; // Oculta los botones
+                    document.querySelector('.forbidden-words').style.display = 'block';
                 };
             });
             wordChoosedElement.innerHTML = "Palabra: Selecciona una palabra";
