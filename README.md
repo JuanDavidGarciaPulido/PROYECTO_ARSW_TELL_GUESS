@@ -1,15 +1,17 @@
-
+a
 ## Run it
 
 ```
-cd server
+cd frontend
 npm install
+npm install jwt-decode
 npm start
 ```
 
 ```
 cd backend
 npm install
+npm install jsonwebtoken express
 npm start
 ```
 

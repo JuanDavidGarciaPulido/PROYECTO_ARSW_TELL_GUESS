@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Tell and Guess</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Nombre de Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="login-button">Iniciar Sesión</button>
+        <p id="login-error" style="color: red; display: none;">Credenciales incorrectas, inténtalo de nuevo.</p>
+    </div>
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <script defer src="login.js"></script>
+</body>
+</html>
